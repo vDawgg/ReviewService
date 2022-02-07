@@ -1,0 +1,34 @@
+//TODO: Find out if the client-side can be implemented here or in other repo
+
+option java_package = "review.service";
+option java_outer_classname = "ReviewServiceProto";
+
+service ReviewService {
+
+  rpc putReviews(Review) returns (Empty) {} //Does this work??
+
+  rpc GetReviews(Product) returns (Review) {}
+
+}
+
+message Product {
+
+  required string product_id = 1;
+
+}
+
+message Review {
+
+  required string id = 1;
+
+  required string name = 2;
+
+  required int32 star = 3;
+
+  optional string text = 4;
+
+  required string product_id = 5;
+
+}
+
+message Empty {}
