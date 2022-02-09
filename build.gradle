@@ -1,12 +1,7 @@
 plugins {
     id 'java'
-}
-
-group 'org.example'
-version '1.0-SNAPSHOT'
-
-repositories {
-    mavenCentral()
+    id 'idea'
+    id 'com.google.protobuf' version '0.8.17'
 }
 
 dependencies {
@@ -16,6 +11,30 @@ dependencies {
     implementation 'io.grpc:grpc-protobuf:1.44.0'
     implementation 'io.grpc:grpc-stub:1.44.0'
     compileOnly 'org.apache.tomcat:annotations-api:6.0.53'
+    implementation 'org.mongodb:mongodb-driver-sync:4.1.1' //TODO: Check if the usage of "Implementation" is really correct here!
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:3.19.2"
+    }
+    plugins {
+        grpc {
+            artifact = 'io.grpc:protoc-gen-grpc-java:1.44.0'
+        }
+    }
+    generateProtoTasks {
+        all()*.plugins {
+            grpc {}
+        }
+    }
+}
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
 }
 
 test {

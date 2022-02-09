@@ -1,5 +1,7 @@
 //TODO: Find out if the client-side can be implemented here or in other repo
 
+//Generated classes can be found under build/generated/source !
+
 option java_package = "review.service";
 option java_outer_classname = "ReviewServiceProto";
 
@@ -7,7 +9,7 @@ service ReviewService {
 
   rpc putReviews(Review) returns (Empty) {} //Does this work??
 
-  rpc GetReviews(Product) returns (Review) {}
+  rpc getReviews(Product) returns (stream Review) {}
 
 }
 
