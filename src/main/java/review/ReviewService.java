@@ -124,6 +124,7 @@ public class ReviewService {
          * @return empty grpc message
          */
         private ReviewServiceProto.Empty addToDB(ReviewServiceProto.Review request) {
+            logger.info("*** Adding review to db!");
             MongoCollection<Document> reviews = db.getCollection("reviews");
             Document review = new Document("id", request.getId()).
                     append("name", request.getName()).
