@@ -2,7 +2,6 @@ package review;
 
 import com.mongodb.MongoException;
 import com.mongodb.client.*;
-import io.grpc.Internal;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.health.v1.HealthCheckResponse;
@@ -88,7 +87,7 @@ public class ReviewService {
     private static class ReviewServiceImpl extends ReviewServiceGrpc.ReviewServiceImplBase {
 
         @Override
-        public void getReviews(ReviewServiceProto.Product request, StreamObserver<ReviewServiceProto.Review> responseObserver) {
+        public void getReviews(ReviewServiceProto.ProductID request, StreamObserver<ReviewServiceProto.Review> responseObserver) {
             MongoCollection<Document> reviews = db.getCollection("reviews");
             FindIterable<Document> iterable = reviews.find(new Document("product_id", request.getProductId()));
             for(Document d : iterable) {
@@ -118,6 +117,7 @@ public class ReviewService {
             responseObserver.onCompleted();
         }
 
+        //TODO: Check if important fields are in the right format (product ID, ID, etc. -> Maybe send a boolean response message back rather than an empty message
         /**
          * Adds a review sent over grpc to the "reviews" mongodb
          * @param request the review
@@ -147,7 +147,6 @@ public class ReviewService {
     }
 
     public static void main(String[] args) {
-
         if(!db.listCollectionNames().into(new ArrayList<>()).contains("reviews")) {
             db.createCollection("reviews");
         }
@@ -159,21 +158,5 @@ public class ReviewService {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        /**Should be working fine now, but still here to fall back on
-        MongoCollection<Document> reviews = db.getCollection("reviews");
-
-        Document review = new Document("id", "one").
-                append("name","peter").
-                append("star", 5).
-                append("text", "I like").
-                append("product_id", 5);
-
-        reviews.insertOne(review);
-
-        Document test = reviews.findOneAndDelete(new Document("id", "one"));
-        logger.info(test.toJson());
-         **/
     }
-
 }

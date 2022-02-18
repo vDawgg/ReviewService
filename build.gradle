@@ -11,7 +11,7 @@ ext {
 }
 
 dependencies {
-        //testImplementation 'org.junit.jupiter:junit-jupiter:5.8.2'
+        testImplementation 'org.junit.jupiter:junit-jupiter:5.8.2'
         runtimeOnly 'io.grpc:grpc-netty-shaded:1.44.0'
         implementation 'io.grpc:grpc-protobuf:1.44.0'
         implementation 'io.grpc:grpc-stub:1.44.0'
@@ -40,8 +40,6 @@ protobuf {
 
 //taken from AdService
 task downloadRepos(type: Copy) {
-    from configurations.compileClasspath
-    into offlineCompile
     from configurations.runtimeClasspath
     into offlineCompile
 }

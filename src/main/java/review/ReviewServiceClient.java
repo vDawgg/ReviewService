@@ -33,7 +33,7 @@ public class ReviewServiceClient {
 
     public void getReviews(String product_id) {
         logger.info("Getting reviews of product: "+product_id);
-        ReviewServiceProto.Product product = ReviewServiceProto.Product.newBuilder().setProductId("sunglasses").build(); //Needs to be changed for real testing
+        ReviewServiceProto.ProductID product = ReviewServiceProto.ProductID.newBuilder().setProductId("sunglasses").build(); //Needs to be changed for real testing
         Iterator<ReviewServiceProto.Review> reviews;
 
         try {
