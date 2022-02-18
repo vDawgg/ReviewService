@@ -11,7 +11,7 @@ service ReviewService {
 
   rpc putReviews(Review) returns (Empty) {} //Does this work??
 
-  rpc getReviews(ProductID) returns (stream Review) {}
+  rpc getReviews(ProductID) returns (Reviews) {}
 
 }
 
@@ -35,6 +35,10 @@ message Review {
 
   string date = 6;
 
+}
+
+message Reviews {
+  repeated Review review = 1;
 }
 
 message Empty {}

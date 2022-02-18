@@ -7,6 +7,7 @@ import review.service.ReviewServiceGrpc;
 import review.service.ReviewServiceProto;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -34,7 +35,7 @@ public class ReviewServiceClient {
     public void getReviews(String product_id) {
         logger.info("Getting reviews of product: "+product_id);
         ReviewServiceProto.ProductID product = ReviewServiceProto.ProductID.newBuilder().setProductId("sunglasses").build(); //Needs to be changed for real testing
-        Iterator<ReviewServiceProto.Review> reviews;
+        ReviewServiceProto.Reviews reviews;
 
         try {
             reviews = blockingStub.getReviews(product);
@@ -43,9 +44,9 @@ public class ReviewServiceClient {
             return;
         }
 
-        for (Iterator<ReviewServiceProto.Review> it = reviews; it.hasNext(); ) {
-            ReviewServiceProto.Review review = it.next();
-            logger.info(review.getText()); //Should be changed to something that has more information
+        List<ReviewServiceProto.Review> reviewList = reviews.getReviewList();
+        for(ReviewServiceProto.Review r : reviewList) {
+            logger.info(r.getText()); //Should be changed to something that has more information
         }
     }
 

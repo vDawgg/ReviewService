@@ -87,12 +87,14 @@ public class ReviewService {
     private static class ReviewServiceImpl extends ReviewServiceGrpc.ReviewServiceImplBase {
 
         @Override
-        public void getReviews(ReviewServiceProto.ProductID request, StreamObserver<ReviewServiceProto.Review> responseObserver) {
+        public void getReviews(ReviewServiceProto.ProductID request, StreamObserver<ReviewServiceProto.Reviews> responseObserver) {
             MongoCollection<Document> reviews = db.getCollection("reviews");
             FindIterable<Document> iterable = reviews.find(new Document("product_id", request.getProductId()));
+            ReviewServiceProto.Reviews.Builder reviewList = ReviewServiceProto.Reviews.newBuilder();
             for(Document d : iterable) {
-                responseObserver.onNext(documentToRPC(d));
+                reviewList.addReview(documentToRPC(d));
             }
+            responseObserver.onNext(reviewList.build());
             responseObserver.onCompleted();
         }
 
