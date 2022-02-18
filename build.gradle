@@ -2,17 +2,23 @@ plugins {
     id 'java'
     id 'idea'
     id 'com.google.protobuf' version '0.8.17'
+    id 'application'
+}
+
+ext {
+    speed = project.hasProperty('speed') ? project.getProperty('speed') : false
+    offlineCompile = new File("$buildDir/output/libs")
 }
 
 dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
-    runtimeOnly 'io.grpc:grpc-netty-shaded:1.44.0'
-    implementation 'io.grpc:grpc-protobuf:1.44.0'
-    implementation 'io.grpc:grpc-stub:1.44.0'
-    implementation 'io.grpc:grpc-services:1.44.0'
-    compileOnly 'org.apache.tomcat:annotations-api:6.0.53'
-    implementation 'org.mongodb:mongodb-driver-sync:4.1.1' //TODO: Check if the usage of "Implementation" is really correct here!
+        //testImplementation 'org.junit.jupiter:junit-jupiter:5.8.2'
+        runtimeOnly 'io.grpc:grpc-netty-shaded:1.44.0'
+        implementation 'io.grpc:grpc-protobuf:1.44.0'
+        implementation 'io.grpc:grpc-stub:1.44.0'
+        implementation 'io.grpc:grpc-services:1.44.0'
+        compileOnly 'org.apache.tomcat:annotations-api:6.0.53'
+        implementation 'org.mongodb:mongodb-driver-sync:4.1.1'
+        //TODO: Check if the usage of "Implementation" is really correct here!
 }
 
 protobuf {
@@ -31,13 +37,32 @@ protobuf {
     }
 }
 
+
+//taken from AdService
+task downloadRepos(type: Copy) {
+    from configurations.compileClasspath
+    into offlineCompile
+    from configurations.runtimeClasspath
+    into offlineCompile
+}
+
+task reviewService(type: CreateStartScripts) {
+    mainClassName('review.ReviewService')
+    applicationName('ReviewService')
+    outputDir(new File(project.buildDir, 'tmp'))
+    //Look into default JVM options for logging
+}
+
+task reviewServiceClient(type: CreateStartScripts) {
+    mainClassName('review.ReviewServiceClient')
+    applicationName('ReviewServiceClient')
+    outputDir(new File(project.buildDir, 'tmp'))
+    //Look into default JVM options for logging
+}
+
 group 'org.example'
 version '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
-}
-
-test {
-    useJUnitPlatform()
 }
