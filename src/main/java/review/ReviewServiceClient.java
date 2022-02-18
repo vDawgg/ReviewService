@@ -3,18 +3,17 @@ package review;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import review.service.ReviewServiceGrpc;
 import review.service.ReviewServiceProto;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class ReviewServiceClient {
 
-    Logger logger = Logger.getLogger("ReviewServiceClient");
+    Logger logger = LogManager.getLogger(ReviewServiceClient.class);
 
     private final ManagedChannel channel;
     private final ReviewServiceGrpc.ReviewServiceBlockingStub blockingStub;
@@ -32,15 +31,19 @@ public class ReviewServiceClient {
         blockingStub = ReviewServiceGrpc.newBlockingStub(channel);
     }
 
+    //TODO: implement boolean logic!
     public void getReviews(String product_id) {
         logger.info("Getting reviews of product: "+product_id);
-        ReviewServiceProto.ProductID product = ReviewServiceProto.ProductID.newBuilder().setProductId("sunglasses").build(); //Needs to be changed for real testing
+        ReviewServiceProto.ProductID product = ReviewServiceProto.ProductID.newBuilder()
+                .setProductId(product_id)
+                .build();
+
         ReviewServiceProto.Reviews reviews;
 
         try {
             reviews = blockingStub.getReviews(product);
         } catch (StatusRuntimeException e) {
-            logger.log(Level.WARNING, "RPC failed: " + e.getStatus());
+            logger.log(org.apache.logging.log4j.Level.WARN, "RPC failed: " + e.getStatus());
             return;
         }
 
@@ -55,16 +58,13 @@ public class ReviewServiceClient {
         channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
     }
 
-    //TODO: Implement Review.toString()
-
     public void putReview(ReviewServiceProto.Review review) {
         logger.info("Sending in a review: "+review);
 
         try {
             blockingStub.putReviews(review);
         } catch (StatusRuntimeException e){
-            logger.log(Level.WARNING, "RPC failed: " + e.getStatus());
-            return;
+            logger.log(org.apache.logging.log4j.Level.WARN, "RPC failed: " + e.getStatus());
         }
     }
 
@@ -76,6 +76,9 @@ public class ReviewServiceClient {
         final String host = "localhost";
         final int serverPort = 6666;
 
+        ReviewServiceClient client = new ReviewServiceClient(host, serverPort);
+
+        /** Shouldnt be needed in production
         ReviewServiceProto.Review r = ReviewServiceProto.Review.newBuilder()
                 .setProductId("sunglasses")
                 .setStar(5)
@@ -84,13 +87,13 @@ public class ReviewServiceClient {
                 .setId("1")
                 .build();
 
-        ReviewServiceClient client = new ReviewServiceClient(host, serverPort);
+
         try {
             client.putReview(r);
             client.getReviews("sunglasses");
         } finally {
             client.shutdown();
-        }
+        }**/
 
     }
 
