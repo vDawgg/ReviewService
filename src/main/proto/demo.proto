@@ -1,5 +1,9 @@
 //TODO: Find out if the client-side can be implemented here or in other repo
 
+//New: specify proto version: 2 because of the use of required fields in go
+syntax = "proto2";
+package reviewservice;
+
 //Generated classes can be found under build/generated/source !
 
 option java_package = "review.service";
