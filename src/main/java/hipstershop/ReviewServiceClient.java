@@ -1,13 +1,12 @@
-package review;
+package hipstershop;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import review.service.ReviewServiceGrpc;
-import review.service.ReviewServiceProto;
-
+import hipstershop.ReviewServiceGrpc;
+import hipstershop.ReviewServiceProto;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 

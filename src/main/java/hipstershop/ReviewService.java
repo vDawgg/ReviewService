@@ -1,4 +1,4 @@
-package review;
+package hipstershop;
 
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Descriptors;
@@ -16,8 +16,6 @@ import org.bson.BsonDocument;
 import org.bson.BsonInt64;
 import org.bson.Document;
 import org.bson.conversions.Bson;
-import review.service.ReviewServiceGrpc;
-import review.service.ReviewServiceProto;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,6 +24,7 @@ public class ReviewService {
 
     //TODO: decide on tracing with jaeger (java library deprecated) or opentelemetry (version suggested by jaeger)
     //TODO: Properly set up log4j (and sl4j for mongodb)
+    //TODO: Add authentication do mongodb
     private static final Logger logger = LogManager.getLogger(ReviewService.class);
 
 

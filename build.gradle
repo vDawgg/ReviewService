@@ -5,12 +5,19 @@ plugins {
     id 'application'
 }
 
+description = 'Review Service'
+group = "reviewservice"
+version = "0.1.0-SNAPSHOT"
+
 ext {
     speed = project.hasProperty('speed') ? project.getProperty('speed') : false
-    offlineCompile = new File("$buildDir/output/libs")
+    offlineCompile = new File("$buildDir/output/lib")
 }
 
 dependencies {
+    if (speed) {
+        implementation fileTree(dir: offlineCompile, include: '*.jar')
+    } else {
         implementation 'org.slf4j:slf4j-api:1.7.36'
         implementation 'org.slf4j:slf4j-log4j12:1.7.36'
         implementation 'org.apache.logging.log4j:log4j-core:2.17.1'
@@ -23,6 +30,7 @@ dependencies {
         compileOnly 'org.apache.tomcat:annotations-api:6.0.53'
         implementation 'org.mongodb:mongodb-driver-sync:4.1.1'
         //TODO: Check if the usage of "Implementation" is really correct here!
+    }
 }
 
 test {
@@ -42,9 +50,21 @@ protobuf {
         all()*.plugins {
             grpc {}
         }
+        ofSourceSet('main')
     }
 }
 
+sourceSets {
+    main {
+        java {
+            srcDirs 'hipstershop'
+            srcDirs 'build/generated/source/proto/main/java/hipstershop'
+            srcDirs 'build/generated/source/proto/main/grpc/hipstershop'
+        }
+    }
+}
+
+startScripts.enabled = false
 
 //taken from AdService
 task downloadRepos(type: Copy) {
@@ -54,21 +74,26 @@ task downloadRepos(type: Copy) {
 }
 
 task reviewService(type: CreateStartScripts) {
-    mainClassName('review.ReviewService')
+    mainClassName('hipstershop.ReviewService')
     applicationName('ReviewService')
     outputDir(new File(project.buildDir, 'tmp'))
+    classpath = startScripts.classpath
     //Look into default JVM options for logging
 }
 
 task reviewServiceClient(type: CreateStartScripts) {
-    mainClassName('review.ReviewServiceClient')
+    mainClassName('hipstershop.ReviewServiceClient')
     applicationName('ReviewServiceClient')
     outputDir(new File(project.buildDir, 'tmp'))
+    classpath = startScripts.classpath
     //Look into default JVM options for logging
 }
 
-group 'org.example'
-version '1.0-SNAPSHOT'
+applicationDistribution.into('bin') {
+    from(reviewService)
+    from(reviewServiceClient)
+    fileMode = 0755
+}
 
 repositories {
     mavenCentral()
