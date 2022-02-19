@@ -1,7 +1,7 @@
 apiVersion: skaffold/v2beta18
 kind: Config
 metadata:
-  name: review #Should they all be called app?
+  name: reviewservice #Should they all be called app?
 # a requires can also be set here if needed
 build:
   artifacts:
@@ -15,7 +15,6 @@ deploy:
   kubectl:
     manifests:
     - ./kubernetes-manifests/reviewservice.yaml
-    - ./kubernetes-manifests/mongodb-pvc.yaml
     - ./kubernetes-manifests/mongodb-deployment.yaml
 profiles:
 - name: gcb
