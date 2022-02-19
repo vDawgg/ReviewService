@@ -22,8 +22,6 @@ RUN apt-get -y update && apt-get install -qqy \
 
 # Download Stackdriver Profiler Java agent
 
-RUN wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/v0.4.7/grpc_health_probe-linux-amd64 && \
-    chmod +x /bin/grpc_health_probe
 
 RUN mkdir -p /opt/cprof && \
     wget -q -O- https://storage.googleapis.com/cloud-profiler/java/latest/profiler_java_agent.tar.gz \
@@ -34,8 +32,11 @@ RUN GRPC_HEALTH_PROBE_VERSION=v0.4.6 && \
     wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
     chmod +x /bin/grpc_health_probe
 
+
 WORKDIR /app
 COPY --from=builder /app .
 
 EXPOSE 6666
-ENTRYPOINT ["/app/build/install/hipstershop/bin/ReviewService"]
+RUN ls /app/build/install/ReviewService/bin/
+
+ENTRYPOINT ["/app/build/install/ReviewService/bin/ReviewService"]
