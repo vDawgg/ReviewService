@@ -14,8 +14,8 @@ build:
 deploy:
   kubectl:
     manifests:
-    - ./kubernetes-manifests/reviewservice.yaml
     - ./kubernetes-manifests/mongodb-deployment.yaml
+    - ./kubernetes-manifests/reviewservice.yaml
 profiles:
 - name: gcb
   build:
