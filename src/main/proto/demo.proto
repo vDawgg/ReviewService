@@ -1,35 +1,41 @@
-//TODO: Find out if the client-side can be implemented here or in other repo
+syntax = "proto3";
 
-//Generated classes can be found under build/generated/source !
+import "google/protobuf/wrappers.proto";
 
-option java_package = "review.service";
+option java_package = "hipstershop";
 option java_outer_classname = "ReviewServiceProto";
 
 service ReviewService {
 
-  rpc putReviews(Review) returns (Empty) {} //Does this work??
+  rpc putReviews(Review) returns (google.protobuf.BoolValue) {}
 
-  rpc getReviews(Product) returns (stream Review) {}
+  rpc getReviews(ProductID) returns (Reviews) {}
 
 }
 
-message Product {
+message ProductID {
 
-  required string product_id = 1;
+  string product_id = 1; //required
 
 }
 
 message Review {
 
-  required string id = 1;
+  string name = 2; //required
 
-  required string name = 2;
-
-  required int32 star = 3;
+  int32 star = 3; //required
 
   optional string text = 4;
 
-  required string product_id = 5;
+  string product_id = 5; //required
+
+  string date = 6;
+
+}
+
+message Reviews {
+
+  repeated Review review = 1;
 
 }
 

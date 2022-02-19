@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reviewservice
+spec:
+  selector:
+    matchLabels:
+      app: reviewservice
+  template:
+    metadata:
+      labels:
+        app: reviewservice
+    spec:
+      serviceAccountName: default
+      terminationGracePeriodSeconds: 5
+      containers:
+        - name: server
+          image: reviewservice
+          ports:
+            - containerPort: 6666
+          env:
+            - name: PORT
+              value: "6666"
+            - name: DISABLE_STATS
+              value: "1"
+            - name: DISABLE_TRACING
+              value: "1"
+            - name: DISABLE_PROFILER
+              value: "1"
+            # New
+            - name: REVIEW_SERVICE_ADDR
+              value: "reviewservice:6666"
+              # - name: JAEGER_SERVICE_ADDR
+              #   value: "jaeger-collector:14268" Might have to be added to enable tracing -> possibly with open telemetry
+          readinessProbe:
+            initialDelaySeconds: 20
+            periodSeconds: 15
+            exec:
+              command: ["/bin/grpc_health_probe", "-addr=:6666"]
+          livenessProbe:
+            initialDelaySeconds: 20
+            periodSeconds: 15
+            exec:
+              command: ["/bin/grpc_health_probe", "-addr=:6666"]
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: reviewservice
+spec:
+  type: ClusterIP
+  selector:
+    app: reviewservice
+  ports:
+    - name: grpc
+      port: 6666
+      targetPort: 6666
