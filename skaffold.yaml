@@ -14,7 +14,7 @@ build:
 deploy:
   kubectl:
     manifests:
-    - ./kubernetes-manifests/mongodb-secret.yaml
+    - ./kubernetes-manifests/mongo-secret.yaml
     - ./kubernetes-manifests/mongodb-deployment.yaml
     - ./kubernetes-manifests/reviewservice.yaml
 profiles:
