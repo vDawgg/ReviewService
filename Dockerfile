@@ -18,5 +18,5 @@ WORKDIR /app
 COPY --from=builder /app .
 
 EXPOSE 6666
-RUN ls /app/build/install/Review\ Service/bin
-ENTRYPOINT ["/app/build/install/Review\ Service/bin/ReviewService"]
+RUN ls /app/build/install/ReviewService/bin
+ENTRYPOINT ["/app/build/install/ReviewService/bin/ReviewService"]
