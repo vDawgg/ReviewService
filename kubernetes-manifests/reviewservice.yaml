@@ -33,9 +33,13 @@ spec:
               # - name: JAEGER_SERVICE_ADDR
               #   value: "jaeger-collector:14268" Might have to be added to enable tracing -> possibly with open telemetry
           readinessProbe:
+            initialDelaySeconds: 20
+            periodSeconds: 15
             exec:
               command: ["/bin/grpc_health_probe", "-addr=:6666"]
           livenessProbe:
+            initialDelaySeconds: 20
+            periodSeconds: 15
             exec:
               command: ["/bin/grpc_health_probe", "-addr=:6666"]
           resources:
