@@ -57,6 +57,8 @@ task reviewService(type: CreateStartScripts) {
     mainClassName('review.ReviewService')
     applicationName('ReviewService')
     outputDir(new File(project.buildDir, 'tmp'))
+    classpath = startScripts.classpath
+
     //Look into default JVM options for logging
 }
 
