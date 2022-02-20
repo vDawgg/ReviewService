@@ -153,12 +153,8 @@ public class ReviewService {
          * @return built "Review" message
          */
         private hipstershop.ReviewServiceProto.Review documentToRPC(Document document) {
-            Date date = new Date();
-            SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy");
-            String dateString = df.format(date);
-
             hipstershop.ReviewServiceProto.Review.Builder builder = hipstershop.ReviewServiceProto.Review.newBuilder();
-            builder.setDate(dateString);
+            builder.setDate((String) document.get("date"));
             builder.setName((String) document.get("name"));
             builder.setStar((int) document.get("star"));
             builder.setText((String) document.get("text"));
