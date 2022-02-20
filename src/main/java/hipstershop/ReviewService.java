@@ -2,7 +2,11 @@ package hipstershop;
 
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Descriptors;
+import com.mongodb.ConnectionString;
+import com.mongodb.MongoClientSettings;
+import com.mongodb.MongoCredential;
 import com.mongodb.MongoException;
+import com.mongodb.client.MongoClients;
 import com.mongodb.client.*;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
@@ -19,6 +23,9 @@ import org.bson.conversions.Bson;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+
+import static java.lang.System.getenv;
 
 public class ReviewService {
 
@@ -34,9 +41,8 @@ public class ReviewService {
     private final Server server;
 
     //Objects for mongodb
-    private static final MongoClient client = MongoClients.create();
-    private static final MongoDatabase db = client.getDatabase("reviewDB");
-
+    private static MongoClient client;
+    private static MongoDatabase db;
 
     public ReviewService(int port) {
         this(ServerBuilder.forPort(port), port);
@@ -55,8 +61,23 @@ public class ReviewService {
      */
      void start() throws IOException {
          BasicConfigurator.configure();
-        int port = Integer.parseInt(System.getenv().getOrDefault("PORT", "6666")); //does this part need to be that complicated?
+        int port = Integer.parseInt(getenv().getOrDefault("PORT", "6666")); //does this part need to be that complicated?
         healthMgr = new HealthStatusManager();
+
+        String mongodb_addr = System.getenv("MONGODB_ADDR");
+        String mongo_initdb_root_username = System.getenv("MONGO_INITDB_ROOT_USERNAME");
+        String mongo_initdb_root_password = System.getenv("MONGO_INITDB_ROOT_PASSWORD");
+
+        MongoCredential credential = MongoCredential.createCredential(mongo_initdb_root_username,
+                "mongodb-service", //check if db name is set correctly here
+                mongo_initdb_root_password.toCharArray());
+        MongoClientSettings.Builder mcsb = MongoClientSettings.builder();
+        MongoClientSettings mcs = mcsb
+                .credential(credential)
+                .applyConnectionString(new ConnectionString("mongodb://"+mongodb_addr+":27017")) //check if the address is set correctly
+                        .build();
+
+        client = MongoClients.create(mcs);
 
         server.start();
 
@@ -96,13 +117,13 @@ public class ReviewService {
         }
     }
 
-    static class ReviewServiceImpl extends ReviewServiceGrpc.ReviewServiceImplBase {
+    static class ReviewServiceImpl extends hipstershop.ReviewServiceGrpc.ReviewServiceImplBase {
 
         @Override
-        public void getReviews(ReviewServiceProto.ProductID request, StreamObserver<ReviewServiceProto.Reviews> responseObserver) {
+        public void getReviews(hipstershop.ReviewServiceProto.ProductID request, StreamObserver<hipstershop.ReviewServiceProto.Reviews> responseObserver) {
             MongoCollection<Document> reviews = db.getCollection("reviews");
             FindIterable<Document> iterable = reviews.find(new Document("product_id", request.getProductId()));
-            ReviewServiceProto.Reviews.Builder reviewList = ReviewServiceProto.Reviews.newBuilder();
+            hipstershop.ReviewServiceProto.Reviews.Builder reviewList = hipstershop.ReviewServiceProto.Reviews.newBuilder();
             for(Document d : iterable) {
                 reviewList.addReview(documentToRPC(d));
             }
@@ -115,8 +136,8 @@ public class ReviewService {
          * @param document document from mongodb
          * @return built "Review" message
          */
-        private ReviewServiceProto.Review documentToRPC(Document document) {
-            ReviewServiceProto.Review.Builder builder = ReviewServiceProto.Review.newBuilder();
+        private hipstershop.ReviewServiceProto.Review documentToRPC(Document document) {
+            hipstershop.ReviewServiceProto.Review.Builder builder = hipstershop.ReviewServiceProto.Review.newBuilder();
             builder.setName((String) document.get("name"));
             builder.setStar((int) document.get("star"));
             builder.setText((String) document.get("text"));
@@ -125,7 +146,7 @@ public class ReviewService {
         }
 
         @Override
-        public void putReviews(ReviewServiceProto.Review request, StreamObserver<BoolValue> responseObserver) {
+        public void putReviews(hipstershop.ReviewServiceProto.Review request, StreamObserver<BoolValue> responseObserver) {
             responseObserver.onNext(addToDB(request));
             responseObserver.onCompleted();
         }
@@ -136,7 +157,7 @@ public class ReviewService {
          * @param request the review
          * @return empty grpc message
          */
-        private BoolValue addToDB(ReviewServiceProto.Review request) {
+        private BoolValue addToDB(hipstershop.ReviewServiceProto.Review request) {
             if(checkReview(request)) {
                 return BoolValue.newBuilder().setValue(false).build();
             }
@@ -151,7 +172,7 @@ public class ReviewService {
             return BoolValue.newBuilder().setValue(true).build();
         }
 
-        private boolean checkReview(ReviewServiceProto.Review request) {
+        private boolean checkReview(hipstershop.ReviewServiceProto.Review request) {
             MongoCollection<Document> reviews = db.getCollection("reviews");
 
             //Might not make much sense to let the frontend generate the id???
