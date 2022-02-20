@@ -2,6 +2,7 @@ syntax = "proto3";
 
 import "google/protobuf/wrappers.proto";
 
+package hipstershop;
 option java_package = "hipstershop";
 option java_outer_classname = "ReviewServiceProto";
 
@@ -25,7 +26,7 @@ message Review {
 
   int32 star = 3; //required
 
-  optional string text = 4;
+  string text = 4;
 
   string product_id = 5; //required
 
