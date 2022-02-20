@@ -14,6 +14,7 @@ import io.grpc.health.v1.HealthCheckResponse;
 import io.grpc.protobuf.services.HealthStatusManager;
 import io.grpc.stub.StreamObserver;
 import org.apache.log4j.BasicConfigurator;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bson.BsonDocument;
@@ -64,8 +65,12 @@ public class ReviewService {
         healthMgr = new HealthStatusManager();
 
         String mongodb_addr = System.getenv("MONGODB_ADDR");
-        String mongo_initdb_root_username = "dXNlcm5hbWU="; //System.getenv("MONGO_INITDB_ROOT_USERNAME");
-        String mongo_initdb_root_password = "cGFzc3dvcmQ=";//System.getenv("MONGO_INITDB_ROOT_PASSWORD");
+        String mongo_initdb_root_username = System.getenv("MONGO_INITDB_ROOT_USERNAME");
+        String mongo_initdb_root_password = System.getenv("MONGO_INITDB_ROOT_PASSWORD");
+        if(mongo_initdb_root_password==null | mongo_initdb_root_username==null | mongodb_addr==null) {
+            logger.log(Level.ERROR, "Environment variables could not be retrieved");
+            return;
+        }
 
         //TODO: Create seperate setup for tests to still work! -> Or let tests run once deployed
         MongoCredential credential = MongoCredential.createCredential(mongo_initdb_root_username,
