@@ -24,11 +24,6 @@ import static org.junit.Assert.assertEquals;
 @RunWith(JUnit4.class)
 public class ReviewServiceTest {
 
-    //maybe add test with very large strings
-
-    //maybe add grpc cleanup rule here
-    //TODO: Change Output directory
-
     private ReviewService server;
     private ManagedChannel inProcessChannel;
     BoolValue t = BoolValue.newBuilder().setValue(true).build();
@@ -69,7 +64,6 @@ public class ReviewServiceTest {
                 .build())
                 .getReviewList();
 
-        //TODO: Find a prettier alternative to this -> this might lead to nullpointers
         ReviewServiceProto.Review response = responseList.stream().filter(t -> t.equals(normalReview)).findFirst().get();
         assertEquals(response, response);
     }
