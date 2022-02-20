@@ -23,7 +23,6 @@ import org.bson.conversions.Bson;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import static java.lang.System.getenv;
 
@@ -65,9 +64,10 @@ public class ReviewService {
         healthMgr = new HealthStatusManager();
 
         String mongodb_addr = System.getenv("MONGODB_ADDR");
-        String mongo_initdb_root_username = System.getenv("MONGO_INITDB_ROOT_USERNAME");
-        String mongo_initdb_root_password = System.getenv("MONGO_INITDB_ROOT_PASSWORD");
+        String mongo_initdb_root_username = "dXNlcm5hbWU="; //System.getenv("MONGO_INITDB_ROOT_USERNAME");
+        String mongo_initdb_root_password = "cGFzc3dvcmQ=";//System.getenv("MONGO_INITDB_ROOT_PASSWORD");
 
+        //TODO: Create seperate setup for tests to still work! -> Or let tests run once deployed
         MongoCredential credential = MongoCredential.createCredential(mongo_initdb_root_username,
                 "mongodb-service", //check if db name is set correctly here
                 mongo_initdb_root_password.toCharArray());
@@ -78,6 +78,7 @@ public class ReviewService {
                         .build();
 
         client = MongoClients.create(mcs);
+        db = client.getDatabase("reviews");
 
         server.start();
 
