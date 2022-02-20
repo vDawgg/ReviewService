@@ -52,8 +52,16 @@ public class ReviewService {
         this.port = port;
         this.server = serverBuilder
                 .addService(new ReviewServiceImpl())
+                .build();
+    }
+
+    public ReviewService(int port, HealthStatusManager healthMgr) {
+        this.port = port;
+        this.server = ServerBuilder.forPort(port)
+                .addService(new ReviewServiceImpl())
                 .addService(healthMgr.getHealthService())
                 .build();
+        this.healthMgr = healthMgr;
     }
 
     /**
@@ -63,7 +71,6 @@ public class ReviewService {
      void start() throws IOException {
          BasicConfigurator.configure();
         int port = Integer.parseInt(getenv().getOrDefault("PORT", "6666")); //does this part need to be that complicated?
-        healthMgr = new HealthStatusManager();
 
         String mongodb_addr = System.getenv("MONGODB_ADDR");
         String mongo_initdb_root_username = System.getenv("MONGO_INITDB_ROOT_USERNAME");
@@ -207,7 +214,8 @@ public class ReviewService {
     }
 
     public static void main(String[] args) {
-        final ReviewService service = new ReviewService(6666);
+        HealthStatusManager healthMgr = new HealthStatusManager();
+        final ReviewService service = new ReviewService(6666, healthMgr);
         try {
             service.start();
             service.blockUntilShutdown();
