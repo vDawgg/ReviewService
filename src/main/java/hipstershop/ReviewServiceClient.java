@@ -72,7 +72,7 @@ public class ReviewServiceClient {
         //TODO: Find out what RpcViews does and whether or not it is needed for this service
 
         //This should be done more intelligently
-        final String host = "localhost";
+        final String host = "0.0.0.0";
         final int serverPort = 6666;
 
         ReviewServiceClient client = new ReviewServiceClient(host, serverPort);
