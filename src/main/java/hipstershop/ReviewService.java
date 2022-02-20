@@ -52,6 +52,7 @@ public class ReviewService {
         this.port = port;
         this.server = serverBuilder
                 .addService(new ReviewServiceImpl())
+                .addService(healthMgr.getHealthService())
                 .build();
     }
 
@@ -96,7 +97,7 @@ public class ReviewService {
                                     ReviewService.this.stop();
                                     System.err.println("*** server shut down");
                                 }));
-        healthMgr.setStatus("Review", HealthCheckResponse.ServingStatus.SERVING);
+        healthMgr.setStatus("", HealthCheckResponse.ServingStatus.SERVING);
 
         try {
             Bson command = new BsonDocument("ping", new BsonInt64(1));
