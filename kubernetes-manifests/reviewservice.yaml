@@ -30,6 +30,18 @@ spec:
             # New
             - name: REVIEW_SERVICE_ADDR
               value: "reviewservice:6666"
+            - name: MONGODB_ADDR
+              value: "mongodb-service"
+            - name: MONGO_INITDB_ROOT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-secret
+                  key: mongo-root-username
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom: 
+                secretKeyRef:
+                  name: mongodb-secret
+                  key: mongo-root-password
               # - name: JAEGER_SERVICE_ADDR
               #   value: "jaeger-collector:14268" Might have to be added to enable tracing -> possibly with open telemetry
           readinessProbe:
