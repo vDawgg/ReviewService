@@ -23,9 +23,7 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 
 import static java.lang.System.getenv;
 
@@ -161,7 +159,6 @@ public class ReviewService {
          */
         private hipstershop.ReviewServiceProto.Review documentToRPC(Document document) {
             hipstershop.ReviewServiceProto.Review.Builder builder = hipstershop.ReviewServiceProto.Review.newBuilder();
-            builder.setDate((String) document.get("date"));
             builder.setName((String) document.get("name"));
             builder.setStar((int) document.get("star"));
             builder.setText((String) document.get("text"));
