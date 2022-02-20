@@ -48,12 +48,12 @@ spec:
             initialDelaySeconds: 20
             periodSeconds: 15
             exec:
-              command: ["/bin/grpc_health_probe", "-addr=:6666"]
+              command: ["/bin/grpc_health_probe", "-addr=:6666", "-rpc-timeout=5s"]
           livenessProbe:
             initialDelaySeconds: 20
             periodSeconds: 15
             exec:
-              command: ["/bin/grpc_health_probe", "-addr=:6666"]
+              command: ["/bin/grpc_health_probe", "-addr=:6666", "-rpc-timeout=5s"]
           resources:
             requests:
               cpu: 100m
