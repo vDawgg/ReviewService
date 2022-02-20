@@ -23,7 +23,9 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 import static java.lang.System.getenv;
 
@@ -151,7 +153,12 @@ public class ReviewService {
          * @return built "Review" message
          */
         private hipstershop.ReviewServiceProto.Review documentToRPC(Document document) {
+            Date date = new Date();
+            SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+            String dateString = df.format(date);
+
             hipstershop.ReviewServiceProto.Review.Builder builder = hipstershop.ReviewServiceProto.Review.newBuilder();
+            builder.setDate(dateString);
             builder.setName((String) document.get("name"));
             builder.setStar((int) document.get("star"));
             builder.setText((String) document.get("text"));
@@ -190,7 +197,6 @@ public class ReviewService {
             MongoCollection<Document> reviews = db.getCollection("reviews");
 
             //Might not make much sense to let the frontend generate the id???
-            Descriptors.FieldDescriptor id = request.getDescriptorForType().findFieldByName("id");
             Descriptors.FieldDescriptor name = request.getDescriptorForType().findFieldByName("name");
             Descriptors.FieldDescriptor star = request.getDescriptorForType().findFieldByName("star");
             Descriptors.FieldDescriptor product_id = request.getDescriptorForType().findFieldByName("product_id");
