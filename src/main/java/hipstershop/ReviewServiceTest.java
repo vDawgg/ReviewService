@@ -20,20 +20,25 @@ import java.util.ArrayList;
 import java.util.List;
 import static org.junit.Assert.assertEquals;
 
+
 //Adapted from https://github.com/grpc/grpc-java/blob/master/examples/src/test/java/io/grpc/examples/routeguide/RouteGuideServerTest.java
+
+/**
+ * Tests for the ReviewService
+ * Has to be run locally; Used with local mongodb server and IntelliJs test runner
+ */
 @RunWith(JUnit4.class)
 public class ReviewServiceTest {
-
-    //maybe add test with very large strings
-
-    //maybe add grpc cleanup rule here
-    //TODO: Change Output directory
 
     private ReviewService server;
     private ManagedChannel inProcessChannel;
     BoolValue t = BoolValue.newBuilder().setValue(true).build();
     BoolValue f = BoolValue.newBuilder().setValue(false).build();
 
+    /**
+     * starts an in-process server and establishes an in-process channel with it
+     * @throws Exception
+     */
     @Before
     public void setUp() throws Exception {
         String servername = InProcessServerBuilder.generateName();
@@ -44,8 +49,11 @@ public class ReviewServiceTest {
         inProcessChannel = InProcessChannelBuilder.forName(servername).directExecutor().build();
     }
 
+    /**
+     * stops the server and deletes the reviews that were added from the db again
+     */
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         server.stop();
         MongoClient client = MongoClients.create();
         MongoDatabase db = client.getDatabase("reviewDB");
@@ -53,6 +61,9 @@ public class ReviewServiceTest {
         db.getCollection("reviews").deleteMany(f1);
     }
 
+    /**
+     * Sends a review to the service and retrieves it again, checking if its the same review
+     */
     @Test
     public void putAndGetReviews() {
         ReviewServiceGrpc.ReviewServiceBlockingStub stub = ReviewServiceGrpc.newBlockingStub(inProcessChannel);
@@ -60,7 +71,7 @@ public class ReviewServiceTest {
                 .setText("Hallihallo")
                 .setName("Mr X")
                 .setStar(5)
-                .setProductId("sunglasses") //Might have to be replaced with actual productids
+                .setProductId("sunglasses")
                 .build();
         BoolValue b = stub.putReviews(normalReview);
         assertEquals(t, b);
@@ -69,11 +80,13 @@ public class ReviewServiceTest {
                 .build())
                 .getReviewList();
 
-        //TODO: Find a prettier alternative to this -> this might lead to nullpointers
         ReviewServiceProto.Review response = responseList.stream().filter(t -> t.equals(normalReview)).findFirst().get();
         assertEquals(response, response);
     }
 
+    /**
+     * tries to let the service add a malformed review to the db, checks if it fails
+     */
     @Test
     public void putWithMissingField() {
         ReviewServiceGrpc.ReviewServiceBlockingStub stub = ReviewServiceGrpc.newBlockingStub(inProcessChannel);
@@ -86,6 +99,9 @@ public class ReviewServiceTest {
         assertEquals(f, b);
     }
 
+    /**
+     * Sends and retrieves multiple reviews to and from the service, checking if they are the same
+     */
     @Test
     public void putAndRetrieveMultiple() {
         ReviewServiceGrpc.ReviewServiceBlockingStub stub = ReviewServiceGrpc.newBlockingStub(inProcessChannel);
@@ -96,21 +112,21 @@ public class ReviewServiceTest {
                 .setText("Hallihallo")
                 .setName("Mr X")
                 .setStar(5)
-                .setProductId("shirt") //Might have to be replaced with actual productids
+                .setProductId("shirt")
                 .build();
         reviewList.add(r1);
         ReviewServiceProto.Review r2 = ReviewServiceProto.Review.newBuilder()
                 .setText("Hallihallo")
                 .setName("Mr X")
                 .setStar(5)
-                .setProductId("shirt") //Might have to be replaced with actual productids
+                .setProductId("shirt")
                 .build();
         reviewList.add(r2);
         ReviewServiceProto.Review r3 = ReviewServiceProto.Review.newBuilder()
                 .setText("Hallihallo")
                 .setName("Mr X")
                 .setStar(5)
-                .setProductId("shirt") //Might have to be replaced with actual productids
+                .setProductId("shirt")
                 .build();
         reviewList.add(r3);
 

@@ -29,11 +29,7 @@ import static java.lang.System.getenv;
 
 public class ReviewService {
 
-    //TODO: decide on tracing with jaeger (java library deprecated) or opentelemetry (version suggested by jaeger)
-    //TODO: Properly set up log4j (and sl4j for mongodb)
-    //TODO: Add authentication do mongodb
     private static final Logger logger = LogManager.getLogger(ReviewService.class);
-
 
     private HealthStatusManager healthMgr;
 
@@ -44,10 +40,7 @@ public class ReviewService {
     private static MongoClient client;
     private static MongoDatabase db;
 
-    public ReviewService(int port) {
-        this(ServerBuilder.forPort(port), port);
-    }
-
+    //Stub for testing
     public ReviewService(ServerBuilder<?> serverBuilder, int port) {
         this.port = port;
         this.server = serverBuilder
@@ -55,6 +48,7 @@ public class ReviewService {
                 .build();
     }
 
+    //Stub for actually running the service
     public ReviewService(int port, HealthStatusManager healthMgr) {
         this.port = port;
         this.server = ServerBuilder.forPort(port)
@@ -72,26 +66,33 @@ public class ReviewService {
          BasicConfigurator.configure();
         int port = Integer.parseInt(getenv().getOrDefault("PORT", "6666")); //does this part need to be that complicated?
 
-        String mongodb_addr = System.getenv("MONGODB_ADDR");
-        String mongo_initdb_root_username = System.getenv("MONGO_INITDB_ROOT_USERNAME");
-        String mongo_initdb_root_password = System.getenv("MONGO_INITDB_ROOT_PASSWORD");
-        if(mongo_initdb_root_password==null | mongo_initdb_root_username==null | mongodb_addr==null) {
-            logger.log(Level.ERROR, "Environment variables could not be retrieved");
-            return;
+        //sets up grpc and db connection if deployed
+        if(this.healthMgr!=null) {
+            String mongodb_addr = System.getenv("MONGODB_ADDR");
+            String mongo_initdb_root_username = System.getenv("MONGO_INITDB_ROOT_USERNAME");
+            String mongo_initdb_root_password = System.getenv("MONGO_INITDB_ROOT_PASSWORD");
+            if (mongo_initdb_root_password == null | mongo_initdb_root_username == null | mongodb_addr == null) {
+                logger.log(Level.ERROR, "Environment variables could not be retrieved");
+                return;
+            }
+
+            MongoCredential credential = MongoCredential.createCredential(mongo_initdb_root_username,
+                    "mongodb-service", //check if db name is set correctly here
+                    mongo_initdb_root_password.toCharArray());
+            MongoClientSettings.Builder mcsb = MongoClientSettings.builder();
+            MongoClientSettings mcs = mcsb
+                    .credential(credential)
+                    .applyConnectionString(new ConnectionString("mongodb://" + mongodb_addr + ":27017")) //check if the address is set correctly
+                    .build();
+
+            client = MongoClients.create(mcs);
+            db = client.getDatabase("reviews");
+        }
+        else {
+            client = MongoClients.create();
+            db = client.getDatabase("reviews");
         }
 
-        //TODO: Create seperate setup for tests to still work! -> Or let tests run once deployed
-        MongoCredential credential = MongoCredential.createCredential(mongo_initdb_root_username,
-                "mongodb-service", //check if db name is set correctly here
-                mongo_initdb_root_password.toCharArray());
-        MongoClientSettings.Builder mcsb = MongoClientSettings.builder();
-        MongoClientSettings mcs = mcsb
-                .credential(credential)
-                .applyConnectionString(new ConnectionString("mongodb://"+mongodb_addr+":27017")) //check if the address is set correctly
-                        .build();
-
-        client = MongoClients.create(mcs);
-        db = client.getDatabase("reviews");
 
         server.start();
 
@@ -104,7 +105,8 @@ public class ReviewService {
                                     ReviewService.this.stop();
                                     System.err.println("*** server shut down");
                                 }));
-        healthMgr.setStatus("", HealthCheckResponse.ServingStatus.SERVING);
+
+        if(healthMgr!=null)  healthMgr.setStatus("", HealthCheckResponse.ServingStatus.SERVING);
 
         try {
             Bson command = new BsonDocument("ping", new BsonInt64(1));
@@ -126,13 +128,18 @@ public class ReviewService {
      */
      void stop() {
         if(server!=null) {
-            healthMgr.clearStatus("Review"); //This might have to applied to the ReviewService explicitly
+            if(healthMgr!=null) healthMgr.clearStatus("Review"); //This might have to applied to the ReviewService explicitly
             server.shutdown();
         }
     }
 
     static class ReviewServiceImpl extends hipstershop.ReviewServiceGrpc.ReviewServiceImplBase {
 
+        /**
+         * Method for getting every review for a specified product
+         * @param request the id of the product
+         * @param responseObserver the observer to send the reviews
+         */
         @Override
         public void getReviews(hipstershop.ReviewServiceProto.ProductID request, StreamObserver<hipstershop.ReviewServiceProto.Reviews> responseObserver) {
             MongoCollection<Document> reviews = db.getCollection("reviews");
@@ -159,17 +166,22 @@ public class ReviewService {
             return builder.build();
         }
 
+        /**
+         * Grpc method for putting and accepting reviews -> Calls method addToDB to add the reviews to the database
+         * @param request the sent review
+         * @param responseObserver
+         */
         @Override
         public void putReviews(hipstershop.ReviewServiceProto.Review request, StreamObserver<BoolValue> responseObserver) {
             responseObserver.onNext(addToDB(request));
             responseObserver.onCompleted();
         }
 
-        //TODO: Check if important fields are in the right format (product ID, ID, etc. -> Maybe send a boolean response message back rather than an empty message
         /**
-         * Adds a review sent over grpc to the "reviews" mongodb
+         * Adds a review sent over grpc to the "reviews" mongodb -> Calls method checkReview() to check if the reviews
+         * are formatted correctly
          * @param request the review
-         * @return empty grpc message
+         * @return boolean value -> true if format correct, false if not
          */
         private BoolValue addToDB(hipstershop.ReviewServiceProto.Review request) {
             if(checkReview(request)) {
@@ -186,6 +198,12 @@ public class ReviewService {
             return BoolValue.newBuilder().setValue(true).build();
         }
 
+        /**
+         * Checks review messages for validity (reviews must have fields name, star and product_id to be added to the
+         * database)
+         * @param request the review to be checked
+         * @return true if format correct, false if not
+         */
         private boolean checkReview(hipstershop.ReviewServiceProto.Review request) {
             MongoCollection<Document> reviews = db.getCollection("reviews");
 
