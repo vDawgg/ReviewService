@@ -52,6 +52,7 @@ gcloud container clusters create onlineboutique \
 ```
 skaffold run -f=skaffold.yaml --default-repo=gcr.io/$PROJECT_ID
 ```
+**Note:** sometimes some other service bugs out and the deployment gets cancelled not by our fault. Just run the command again and it should work.
 
 
 5. **Wait for the Pods to be ready.**
