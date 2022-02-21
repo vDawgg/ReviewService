@@ -18,5 +18,14 @@ build an image with docker from the root directory: docker build ./
 
 or
 
-build the project with gradle: ./gradlew installDist
+build the project with gradle: ./gradlew build
+
+
+If you want to run the test in the hipstershop package things get a little more complicated:
+
+- Import this project into IntelliJ and set IntelliJ as your build runner
+
+- Install and run a local instance of mongodb in the default settings (no authentication and using the standard port 27017)
+
+- Run the tests
 
