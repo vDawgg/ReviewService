@@ -1,7 +1,7 @@
 
 # ReviewService
 
-Review service is a service for getting and putting reviews a product page in the frontend.
+Review service is a service for getting and putting reviews in a product page in the frontend.
 Reviews are used for customers to leave feedback about a product. Fronted uses grpc calls to make calls to the review service, which puts and gets reviews stored in a MongoDB. For our purposes we also deploy a mongodb service with skuffold. 
 
 ## Screenshots
